@@ -67,7 +67,7 @@ const copyWallet = async () => {
         {/* QR IMAGE */}
         <div className="mb-[20px] flex justify-center">
           <img
-            src="/qr.png" // 👉 cambia este archivo en /public
+            src="/qr-code.png" // 👉 cambia este archivo en /public
             alt="QR"
             className="h-[220px] w-[220px] rounded-[16px] bg-white p-[10px]"
           />
