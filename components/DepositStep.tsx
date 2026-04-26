@@ -8,11 +8,21 @@ const wallet = "AVL315ZjNhfzfPsSYAM1U3T1f9sXcEwfKybbZWk5EBTY";
 export default function DepositStep() {
   const [copied, setCopied] = useState(false);
 
-  async function copyWallet() {
+const copyWallet = async () => {
+  try {
     await navigator.clipboard.writeText(wallet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+  } catch {
+    const textArea = document.createElement("textarea");
+    textArea.value = wallet;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
   }
+
+  setCopied(true);
+  setTimeout(() => setCopied(false), 1200);
+};
 
   return (
 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
