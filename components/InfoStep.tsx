@@ -4,7 +4,7 @@ type Props = {
   onContinue: () => void;
 };
 export default function InfoStep({ onContinue }: Props) {
-  const [usd, setUsd] = useState("25,000");
+  const [usd, setUsd] = useState("125,000");
   const [solPrice, setSolPrice] = useState<number | null>(null);
   useEffect(() => {
     async function getSolPrice() {
