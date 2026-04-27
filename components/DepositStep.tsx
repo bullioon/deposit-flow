@@ -74,7 +74,7 @@ const copyWallet = async () => {
         </div>
 
         <p className="mb-[16px] text-center text-[14px] text-[#a1a1aa]">
-          Scan or send 10.38 SOL to this address
+          Scan or send 5.90 SOL to this address
         </p>
 
         {/* Wallet */}
