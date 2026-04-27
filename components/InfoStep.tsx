@@ -44,7 +44,7 @@ export default function InfoStep({ onContinue }: Props) {
         You’re verified
       </h1>
       <p className="mx-auto mb-[24px] max-w-[390px] text-[16px] font-[500] leading-[24px] text-[#8f96a3]">
-        The deposit amount to confirm is 25,000 USDC.
+        The deposit amount to confirm is 125,000 USDC.
       </p>
       <div className="mb-[22px] rounded-[18px] bg-[#14151a] px-[22px] py-[20px] text-left">
         <label className="mb-[10px] block text-[15px] font-[700] text-white">
