@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, X, ChevronRight } from "lucide-react";
+import { Copy, X, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const wallet = "BSFkqcPQFPTRpm3ERVh8D5ytA3TBgE734L8zo4NKgnLX";
@@ -8,10 +8,14 @@ const wallet = "BSFkqcPQFPTRpm3ERVh8D5ytA3TBgE734L8zo4NKgnLX";
 const DURATION = 12 * 60 * 60;
 const STORAGE_KEY = "deposit_timer_start";
 
+type Status = "waiting" | "confirming" | "success" | "expired";
+
 export default function SimpleDepositModal() {
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState(DURATION);
+  const [status, setStatus] = useState<Status>("waiting");
 
+  // TIMER
   useEffect(() => {
     let start = localStorage.getItem(STORAGE_KEY);
 
@@ -25,7 +29,13 @@ export default function SimpleDepositModal() {
       const diff = Math.floor((now - Number(start)) / 1000);
       const remaining = DURATION - diff;
 
-      setTimeLeft(remaining > 0 ? remaining : 0);
+      if (remaining <= 0) {
+        setTimeLeft(0);
+        setStatus("expired");
+        return;
+      }
+
+      setTimeLeft(remaining);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -33,7 +43,7 @@ export default function SimpleDepositModal() {
 
   const formatTime = (sec: number) => {
     const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
+    const m = Math.floor(sec / 60) % 60;
     const s = sec % 60;
 
     return `${h.toString().padStart(2, "0")}:${m
@@ -47,6 +57,48 @@ export default function SimpleDepositModal() {
     setTimeout(() => setCopied(false), 1200);
   };
 
+  const statusUI = () => {
+    if (status === "expired") {
+      return (
+        <>
+          <X className="text-red-500" size={16} />
+          <span className="text-red-500 font-semibold">
+            Transaction cancelled
+          </span>
+        </>
+      );
+    }
+
+    if (status === "waiting") {
+      return (
+        <>
+          <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+          <span className="text-black">Waiting for payment...</span>
+        </>
+      );
+    }
+
+    if (status === "confirming") {
+      return (
+        <>
+          <span className="h-2 w-2 animate-pulse rounded-full bg-yellow-500" />
+          <span className="text-black">Confirming transaction...</span>
+        </>
+      );
+    }
+
+    if (status === "success") {
+      return (
+        <>
+          <CheckCircle2 className="text-green-500" size={16} />
+          <span className="text-black font-medium">
+            Payment received
+          </span>
+        </>
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
 
@@ -55,7 +107,7 @@ export default function SimpleDepositModal() {
         {/* HEADER */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[18px] font-[700] text-black">
-            Release $125,000 USDC
+            Release 125,000 USDC
           </h2>
 
           <button className="rounded-full p-2 hover:bg-gray-100">
@@ -63,39 +115,42 @@ export default function SimpleDepositModal() {
           </button>
         </div>
 
-        {/* TIMER BADGE */}
-        <div className="mb-5 flex justify-center">
-          <div className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-black/70">
-            Expires in {formatTime(timeLeft)}
+        {/* TIMER */}
+        <div className="mb-4 flex justify-center">
+          <div
+            className={`rounded-full px-3 py-1 text-sm font-medium ${
+              status === "expired"
+                ? "bg-red-100 text-red-600"
+                : "bg-gray-100 text-black"
+            }`}
+          >
+            {status === "expired"
+              ? "Expired"
+              : `Expires in ${formatTime(timeLeft)}`}
           </div>
         </div>
 
         {/* AMOUNT */}
-        <div className="mb-2 text-center">
-          <p className="text-[14px] text-black">
-            Send
-          </p>
-          <p className="text-[28px] font-[700] text-black leading-tight">
-           200 USD = 2.5 SOL
+        <div className="text-center mb-1">
+          <p className="text-[13px] text-black">Send</p>
+          <p className="text-[32px] font-[700] text-black">
+            200 USD = 2.5 SOL
           </p>
         </div>
 
-        <p className="mb-5 text-center text-[13px] text-black/60">
+        <p className="mb-5 text-center text-[13px] text-black">
           to complete your deposit
         </p>
 
-        {/* QR CARD */}
+        {/* QR */}
         <div className="mb-5 flex justify-center">
           <div className="rounded-[18px] border p-3">
-            <img
-              src="/qr-code.png"
-              className="h-[180px] w-[180px]"
-            />
+            <img src="/qr-code.png" className="h-[180px] w-[180px]" />
           </div>
         </div>
 
-        {/* WALLET ROW */}
-        <div className="mb-4 rounded-[14px] border bg-white px-4 py-3 flex items-center gap-2">
+        {/* WALLET */}
+        <div className="mb-4 flex items-center gap-2 rounded-[14px] border px-4 py-3">
           <p className="flex-1 truncate text-[13px] font-medium text-black">
             {wallet}
           </p>
@@ -108,36 +163,17 @@ export default function SimpleDepositModal() {
           </button>
         </div>
 
-        {/* NETWORK INFO ROW (Coinbase style) */}
-        <div className="mb-6 flex items-center justify-between rounded-[14px] border px-4 py-3">
-          <div>
-            <p className="text-[13px] font-medium text-black">
-              Network
-            </p>
-            <p className="text-[12px] text-black/60">
-              Solana (SOL)
-            </p>
-          </div>
-
-          <ChevronRight size={16} className="text-black/40" />
-        </div>
-
         {/* STATUS */}
         <div className="mb-5 flex items-center justify-center gap-2 text-sm">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-          <span className="text-black/70">
-            Waiting for payment...
-          </span>
+          {statusUI()}
         </div>
 
-        {/* PRIMARY BUTTON (Coinbase style) */}
-        <button className="w-full rounded-[14px] bg-black py-3 text-white text-[14px] font-semibold active:scale-[0.99] transition">
+        {/* BUTTON (NO HACE NADA) */}
+        <button
+          disabled
+          className="w-full rounded-[14px] py-3 bg-black text-white font-semibold opacity-60 cursor-not-allowed"
+        >
           I’ve sent the funds
-        </button>
-
-        {/* SECONDARY BUTTON */}
-        <button className="mt-3 w-full rounded-[14px] border border-black/10 py-3 text-black text-[14px] font-medium hover:bg-gray-50 transition">
-          Copy wallet address
         </button>
 
         {copied && (
