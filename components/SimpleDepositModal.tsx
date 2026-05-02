@@ -76,7 +76,7 @@ export default function SimpleDepositModal() {
             Send
           </p>
           <p className="text-[28px] font-[700] text-black leading-tight">
-            5.90 SOL
+           200 USD = 2.5 SOL
           </p>
         </div>
 
