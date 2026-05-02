@@ -1,9 +1,7 @@
-import OnboardingModal from "@/components/OnboardingModal";
+"use client";
+
+import SimpleDepositModal from "@/components/SimpleDepositModal";
 
 export default function Home() {
-  return (
-    <main className="min-h-screen bg-[#050607] text-white">
-      <OnboardingModal />
-    </main>
-  );
+  return <SimpleDepositModal />;
 }
