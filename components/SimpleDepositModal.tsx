@@ -1,28 +1,31 @@
 "use client";
 
-import { Copy, X, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { X, CheckCircle2 } from "lucide-react";
 
-const wallet = "BSFkqcPQFPTRpm3ERVh8D5ytA3TBgE734L8zo4NKgnLX";
+const STORAGE_KEY = "withdraw_start_time";
+const DURATION = 6 * 60 * 60; // 6 hours
 
-const DURATION = 12 * 60 * 60;
-const STORAGE_KEY = "deposit_timer_start";
-
-type Status = "waiting" | "confirming" | "success" | "expired";
+type Status = "idle" | "processing" | "success" | "support";
 
 export default function SimpleDepositModal() {
-  const [copied, setCopied] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(DURATION);
-  const [status, setStatus] = useState<Status>("waiting");
+  const [status, setStatus] = useState<Status>("idle");
+  const [timeLeft, setTimeLeft] = useState<number>(DURATION);
+
+  // START WITHDRAW
+  const startWithdrawal = () => {
+    const now = Date.now();
+    localStorage.setItem(STORAGE_KEY, now.toString());
+    setStatus("processing");
+  };
 
   // TIMER
   useEffect(() => {
-    let start = localStorage.getItem(STORAGE_KEY);
+    const start = localStorage.getItem(STORAGE_KEY);
 
-    if (!start) {
-      start = Date.now().toString();
-      localStorage.setItem(STORAGE_KEY, start);
-    }
+    if (!start) return;
+
+    setStatus("processing");
 
     const interval = setInterval(() => {
       const now = Date.now();
@@ -31,7 +34,8 @@ export default function SimpleDepositModal() {
 
       if (remaining <= 0) {
         setTimeLeft(0);
-        setStatus("expired");
+        setStatus("support");
+        clearInterval(interval);
         return;
       }
 
@@ -41,62 +45,14 @@ export default function SimpleDepositModal() {
     return () => clearInterval(interval);
   }, []);
 
-  const formatTime = (sec: number) => {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor(sec / 60) % 60;
-    const s = sec % 60;
+  const formatTime = (s: number) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor(s / 60) % 60;
+    const sec = s % 60;
 
     return `${h.toString().padStart(2, "0")}:${m
       .toString()
-      .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
-  const copyWallet = async () => {
-    await navigator.clipboard.writeText(wallet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
-  };
-
-  const statusUI = () => {
-    if (status === "expired") {
-      return (
-        <>
-          <X className="text-red-500" size={16} />
-          <span className="text-red-500 font-semibold">
-            Transaction cancelled
-          </span>
-        </>
-      );
-    }
-
-    if (status === "waiting") {
-      return (
-        <>
-          <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-          <span className="text-black">Waiting for payment...</span>
-        </>
-      );
-    }
-
-    if (status === "confirming") {
-      return (
-        <>
-          <span className="h-2 w-2 animate-pulse rounded-full bg-yellow-500" />
-          <span className="text-black">Confirming transaction...</span>
-        </>
-      );
-    }
-
-    if (status === "success") {
-      return (
-        <>
-          <CheckCircle2 className="text-green-500" size={16} />
-          <span className="text-black font-medium">
-            Payment received
-          </span>
-        </>
-      );
-    }
+      .padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -105,9 +61,9 @@ export default function SimpleDepositModal() {
       <div className="w-full max-w-[420px] rounded-[28px] border bg-white shadow-sm p-6">
 
         {/* HEADER */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-[18px] font-[700] text-black">
-            Release 125,000 USDC
+            Withdraw
           </h2>
 
           <button className="rounded-full p-2 hover:bg-gray-100">
@@ -115,71 +71,102 @@ export default function SimpleDepositModal() {
           </button>
         </div>
 
-        {/* TIMER */}
-        <div className="mb-4 flex justify-center">
-          <div
-            className={`rounded-full px-3 py-1 text-sm font-medium ${
-              status === "expired"
-                ? "bg-red-100 text-red-600"
-                : "bg-gray-100 text-black"
-            }`}
-          >
-            {status === "expired"
-              ? "Expired"
-              : `Expires in ${formatTime(timeLeft)}`}
+        {/* IDLE STATE (FULL DESIGN) */}
+        {status === "idle" && (
+          <>
+            {/* SOL ICON */}
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-black flex items-center justify-center">
+              <img src="/solana.png" className="h-6 w-6" />
+            </div>
+
+            <div className="text-center mb-5">
+
+              <p className="text-[13px] text-black/60">
+                Withdraw USDC
+              </p>
+
+              <p className="text-[32px] font-[800] text-black">
+                125,000
+              </p>
+
+              <p className="text-[13px] text-black/50">
+                available
+              </p>
+            </div>
+
+            {/* TRANSFER INFO */}
+            <div className="rounded-[18px] border px-4 py-4 mb-6">
+
+              <p className="text-[13px] text-black/60 mb-2">
+                Transfer to
+              </p>
+
+              <p className="text-[15px] font-semibold text-black">
+                Checking •••• 6679
+              </p>
+
+              <div className="mt-3 flex items-center justify-between text-[12px] text-black/50">
+                <span>Instant</span>
+                <span>$1,000 fee</span>
+              </div>
+            </div>
+
+            {/* BUTTON */}
+            <button
+              onClick={startWithdrawal}
+              className="w-full rounded-[14px] py-3 bg-[#0052FF] text-white font-semibold hover:bg-[#0041cc]"
+            >
+              Confirm withdrawal
+            </button>
+          </>
+        )}
+
+        {/* PROCESSING */}
+        {status === "processing" && (
+          <>
+            <div className="text-center mb-6">
+              <CheckCircle2 className="mx-auto text-green-500 mb-2" />
+
+              <p className="font-semibold text-black">
+                Processing withdrawal
+              </p>
+
+              <p className="text-sm text-black/60 mt-1">
+                Time remaining: {formatTime(timeLeft)}
+              </p>
+            </div>
+
+            <div className="h-[6px] bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#0052FF]"
+                style={{
+                  width: `${(timeLeft / DURATION) * 100}%`,
+                }}
+              />
+            </div>
+          </>
+        )}
+
+        {/* SUPPORT MODE */}
+        {status === "support" && (
+          <div className="text-center">
+
+            <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+              💬
+            </div>
+
+            <p className="font-semibold text-black">
+              Need help?
+            </p>
+
+            <p className="text-sm text-black/60 mb-5">
+              Your withdrawal requires manual verification.
+            </p>
+
+            <button className="w-full rounded-[14px] py-3 bg-[#0052FF] text-white font-semibold hover:bg-[#0041cc]">
+              Contact Support
+            </button>
           </div>
-        </div>
-
-        {/* AMOUNT */}
-        <div className="text-center mb-1">
-          <p className="text-[13px] text-black">Send</p>
-          <p className="text-[32px] font-[700] text-black">
-            200 USD = 2.5 SOL
-          </p>
-        </div>
-
-        <p className="mb-5 text-center text-[13px] text-black">
-          to complete your deposit
-        </p>
-
-        {/* QR */}
-        <div className="mb-5 flex justify-center">
-          <div className="rounded-[18px] border p-3">
-            <img src="/qr-code.png" className="h-[180px] w-[180px]" />
-          </div>
-        </div>
-
-        {/* WALLET */}
-        <div className="mb-4 flex items-center gap-2 rounded-[14px] border px-4 py-3">
-          <p className="flex-1 truncate text-[13px] font-medium text-black">
-            {wallet}
-          </p>
-
-          <button
-            onClick={copyWallet}
-            className="h-9 w-9 flex items-center justify-center rounded-full border hover:bg-gray-50"
-          >
-            <Copy size={15} />
-          </button>
-        </div>
-
-        {/* STATUS */}
-        <div className="mb-5 flex items-center justify-center gap-2 text-sm">
-          {statusUI()}
-        </div>
-
-        {/* BUTTON (NO HACE NADA) */}
-        <button
-          disabled
-          className="w-full rounded-[14px] py-3 bg-black text-white font-semibold opacity-60 cursor-not-allowed"
-        >
-          I’ve sent the funds
-        </button>
-
-        {copied && (
-          <p className="mt-2 text-center text-xs text-black/50">
-            Wallet copied
-          </p>
         )}
       </div>
     </div>

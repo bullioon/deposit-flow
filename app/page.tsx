@@ -1,7 +1,5 @@
-"use client";
+import Flow from "@/components/Flow";
 
-import SimpleDepositModal from "@/components/SimpleDepositModal";
-
-export default function Home() {
-  return <SimpleDepositModal />;
+export default function Page() {
+  return <Flow />;
 }
