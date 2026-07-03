@@ -14,11 +14,14 @@ export default function SimpleDepositModal() {
   const [solanaWallet, setSolanaWallet] = useState("");
 
   // START WITHDRAW
-  const startWithdrawal = () => {
-    const now = Date.now();
-    localStorage.setItem(STORAGE_KEY, now.toString());
-    setStatus("processing");
-  };
+  
+const startWithdrawal = () => {
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    localStorage.setItem(STORAGE_KEY, Date.now().toString());
+  }
+
+  setStatus("processing");
+};
 
   // TIMER (ROBUSTO + SIN FLICKER)
   useEffect(() => {
