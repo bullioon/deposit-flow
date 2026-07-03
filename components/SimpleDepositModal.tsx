@@ -42,11 +42,11 @@ if (savedWallet) {
       const diff = Math.floor((now - startTime) / 1000);
       const remaining = DURATION - diff;
 
-      if (remaining <= 0) {
-        setTimeLeft(0);
-        setStatus("support");
-        return;
-      }
+   if (remaining <= 0) {
+  setTimeLeft(0);
+  clearInterval(interval);
+  return;
+}
 
       setTimeLeft(remaining);
     };
@@ -222,27 +222,7 @@ className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-[13p
           </>
         )}
 
-        {/* SUPPORT */}
-        {status === "support" && (
-          <div className="text-center">
-
-            <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-              💬
-            </div>
-
-            <p className="font-semibold text-black">
-              Need help?
-            </p>
-
-            <p className="text-sm text-black/60 mb-5">
-              Your withdrawal requires manual verification.
-            </p>
-
-            <button className="w-full rounded-[14px] py-3 bg-[#0052FF] text-white font-semibold hover:bg-[#0041cc]">
-              Contact Support
-            </button>
-          </div>
-        )}
+    
       </div>
     </div>
   );
