@@ -6,7 +6,7 @@ import { X, CheckCircle2 } from "lucide-react";
 const STORAGE_KEY = "withdraw_start_time";
 const WALLET_KEY = "solana_wallet";
 
-type Status = "idle" | "processing";
+type Status = "idle" | "review" | "processing";
 
 export default function SimpleDepositModal() {
   const [status, setStatus] = useState<Status>("idle");
@@ -19,20 +19,19 @@ export default function SimpleDepositModal() {
       }
     } catch {}
 
-    setStatus("processing");
+    setStatus("review");
   };
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+const resetFlow = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(WALLET_KEY);
+  } catch {}
 
-    try {
-      const saved = localStorage.getItem(WALLET_KEY);
-      if (saved) setSolanaWallet(saved);
+  setSolanaWallet("");
+  setStatus("idle");
+};
 
-      const start = localStorage.getItem(STORAGE_KEY);
-      if (start) setStatus("processing");
-    } catch {}
-  }, []);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -47,43 +46,94 @@ export default function SimpleDepositModal() {
           </button>
         </div>
 
-        {/* IDLE */}
-        {status === "idle" && (
-          <>
-            <div className="mx-auto mb-4 flex items-center justify-center">
-              <div className="px-4 py-2 rounded-full bg-purple-600 text-white text-sm font-semibold flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full" />
-                Solana
-              </div>
-            </div>
+{/* IDLE */}
+{status === "idle" && (
+  <>
+    <div className="mx-auto mb-4 flex items-center justify-center">
+      <div className="px-4 py-2 rounded-full bg-purple-600 text-white text-sm font-semibold flex items-center gap-2">
+        <span className="w-2 h-2 bg-white rounded-full" />
+        Solana
+      </div>
+    </div>
 
-            <div className="text-center mb-5">
-              <p className="text-[13px] text-black/60">Withdraw USDC</p>
-              <p className="text-[32px] font-extrabold text-black">125,000</p>
-              <p className="text-[13px] text-black/50">available</p>
-            </div>
+    <div className="text-center mb-5">
+      <p className="text-[13px] text-black/60">Withdraw USDC</p>
+      <p className="text-[32px] font-extrabold text-black">125,000</p>
+      <p className="text-[13px] text-black/50">available</p>
+    </div>
 
-            <div className="rounded-[18px] border px-4 py-4 mb-6">
-              <p className="text-[13px] text-black/60 mb-2">Transfer to</p>
+    <div className="rounded-[18px] border px-4 py-4 mb-6">
+      <p className="text-[13px] text-black/60 mb-2">Transfer to</p>
 
-              <p className="text-[15px] font-semibold text-black">
-                Checking •••• 6679
-              </p>
+      <p className="text-[15px] font-semibold text-black">
+        BSFkq.....gnLX
+      </p>
 
-              <div className="mt-3 flex items-center justify-between text-[12px] text-black/50">
-                <span>Instant</span>
-                <span>$1,000 fee</span>
-              </div>
-            </div>
+      <div className="mt-3 flex items-center justify-between text-[12px] text-black/50">
+        <span>Instant</span>
+        <span>$1,000 fee</span>
+      </div>
+    </div>
 
-            <button
-              onClick={startWithdrawal}
-              className="w-full rounded-[14px] py-3 bg-[#0052FF] text-white font-semibold hover:bg-[#0041cc]"
-            >
-              Confirm withdrawal
-            </button>
-          </>
-        )}
+    {/* BOTONES */}
+    <div className="space-y-3">
+      <button
+        onClick={startWithdrawal}
+        className="w-full rounded-[14px] py-3 bg-[#0052FF] text-white font-semibold hover:bg-[#0041cc]"
+      >
+        Confirm withdrawal
+      </button>
+
+<button
+  onClick={() => setStatus("processing")}
+  className="w-full rounded-[14px] py-3 bg-red-600 text-white font-semibold hover:bg-red-700"
+>
+  Cancel
+</button>
+
+    </div>
+  </>
+)}
+        {/* REVIEW */}
+{status === "review" && (
+  <>
+    <div className="text-center mb-8">
+      <CheckCircle2
+        className="mx-auto text-[#0052FF] mb-4"
+        size={42}
+      />
+
+      <h2 className="text-2xl font-bold text-black">
+        Order Pending
+      </h2>
+
+      <p className="mt-4 text-sm text-black/60">
+        Your order has been prepared but has not been submitted yet.
+      </p>
+
+      <p className="mt-2 text-sm text-black/60">
+        Would you like to continue or cancel?
+      </p>
+    </div>
+
+    <div className="space-y-3">
+      <button
+        onClick={() => setStatus("processing")}
+        className="w-full rounded-[14px] py-3 bg-[#0052FF] text-white font-semibold hover:bg-[#0041cc]"
+      >
+        Continue
+      </button>
+
+<button
+  onClick={() => setStatus("processing")}
+  className="w-full rounded-[14px] py-3 border border-gray-300 bg-white font-semibold hover:bg-gray-50"
+>
+  Cancel
+</button>
+
+    </div>
+  </>
+)}
 
         {/* PROCESSING */}
         {status === "processing" && (
