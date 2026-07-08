@@ -8,7 +8,7 @@ type Props = {
 };
 
 export default function InfoStep({ onContinue }: Props) {
-  const [usd, setUsd] = useState("125,000");
+  const [usd, setUsd] = useState("22,000");
   const [solPrice, setSolPrice] = useState<number | null>(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function InfoStep({ onContinue }: Props) {
 
         {/* TEXT */}
         <p className="mb-5 text-[14px] text-black/60 text-center">
-          The deposit amount to confirm is 125,000 USDC.
+          The deposit amount to confirm is 22,000 USDC.
         </p>
 
         {/* AMOUNT BOX */}

@@ -58,7 +58,7 @@ const resetFlow = () => {
 
     <div className="text-center mb-5">
       <p className="text-[13px] text-black/60">Withdraw USDC</p>
-      <p className="text-[32px] font-extrabold text-black">125,000</p>
+      <p className="text-[32px] font-extrabold text-black">22,000</p>
       <p className="text-[13px] text-black/50">available</p>
     </div>
 
