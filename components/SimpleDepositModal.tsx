@@ -6,7 +6,7 @@ import { X, CheckCircle2 } from "lucide-react";
 const STORAGE_KEY = "withdraw_start_time";
 const WALLET_KEY = "solana_wallet";
 
-type Status = "idle" | "review" | "processing";
+type Status = "idle" | "review" | "processing" | "success";
 
 export default function SimpleDepositModal() {
   const [status, setStatus] = useState<Status>("idle");
@@ -85,10 +85,10 @@ const resetFlow = () => {
       </button>
 
 <button
-  onClick={() => setStatus("processing")}
-  className="w-full rounded-[14px] py-3 bg-red-600 text-white font-semibold hover:bg-red-700"
+  onClick={() => setStatus("success")}
+  className="w-full rounded-[14px] py-3 bg-[#0052FF] text-white font-semibold hover:bg-[#0041cc]"
 >
-  Cancel
+  Continue
 </button>
 
     </div>
@@ -152,28 +152,9 @@ const resetFlow = () => {
                 </div>
               </div>
 
-              {/* TEXTO UPDATED */}
-              <p className="text-sm text-black/60 mt-3">
-                Processing time after confirmation:{" "}
-                <span className="font-semibold text-black">20 minutes</span>
-              </p>
-
-              <p className="text-xs text-black/50 mt-2">
-                Network $136 Fee Missing. The release time after that is 20 minutes.
-              </p>
             </div>
-
-
-            {/* DESTINO */}
-            <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-left">
-              <p className="text-xs font-semibold text-black/70 mb-1">
-                Deposit Fee Pending - Destination (SOL)
-              </p>
-
-              <p className="text-[11px] text-black/60 break-all">
-                Dn5T35muNSyC7CfuyvxR2DX7Y3hTBL5SKWqd5DncvcTW
-              </p>
-            </div>
+  
+            
 
             {/* BOTÓN FINAL */}
             <div className="mt-6">
@@ -188,7 +169,35 @@ const resetFlow = () => {
             </div>
           </>
         )}
+
+
+                  
+{/* SUCCESS */}
+{status === "success" && (
+  <div className="flex flex-col items-center justify-center py-16">
+    <CheckCircle2
+      size={56}
+      className="text-green-500"
+    />
+
+    <h2 className="mt-5 text-2xl font-bold text-black">
+      Successful
+    </h2>
+
+    <div className="mt-6 rounded-full bg-green-100 px-6 py-2">
+      <span className="text-sm font-semibold text-green-700">
+        22,000 sent to Solana wallet
+      </span>
+    </div>
+  </div>
+)}
+
+
       </div>
     </div>
+
+
+
   );
 }
+
