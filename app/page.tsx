@@ -396,7 +396,7 @@ mt-2
 text-3xl
 font-bold
 ">
-1,120 USD
+$620.12 USD
 </p>
 
 
