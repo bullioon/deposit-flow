@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, CheckCircle2 } from "lucide-react";
 
 
@@ -9,6 +9,7 @@ export default function Home() {
   const [hash, setHash] = useState("");
   const [searched, setSearched] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(12 * 60 * 60); // 12 horas en segundos
   
 
   const searchTransaction = () => {
@@ -18,6 +19,26 @@ export default function Home() {
     }
 
   };
+
+  useEffect(() => {
+  if (!confirmed) return;
+
+  const interval = setInterval(() => {
+    setTimeLeft((prev) => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [confirmed]);
+
+const hours = String(Math.floor(timeLeft / 3600)).padStart(2, "0");
+const minutes = String(Math.floor((timeLeft % 3600) / 60)).padStart(2, "0");
+const seconds = String(timeLeft % 60).padStart(2, "0");
 
 
   return (
@@ -396,7 +417,7 @@ mt-2
 text-3xl
 font-bold
 ">
-$620.12 USD
+$370.12 USD
 </p>
 
 
@@ -417,6 +438,24 @@ font-semibold
 ">
 
 SOLANA
+
+</div>
+<div className="
+mt-8
+rounded-xl
+border
+border-yellow-500/30
+bg-yellow-500/10
+p-4
+">
+
+  <p className="text-sm text-yellow-300">
+    Transaction will be canceled in
+  </p>
+
+  <p className="mt-2 text-2xl font-bold text-yellow-400">
+    {hours}:{minutes}:{seconds}
+  </p>
 
 </div>
 
