@@ -108,7 +108,7 @@ font-bold
 text-yellow-400
 ">
 
-Remining fees: $422 Total
+Remining fees: $370 Total
 
 </h2>
 
