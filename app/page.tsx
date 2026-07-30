@@ -149,7 +149,7 @@ setConfirmed(true);
           text-2xl
           font-bold
         ">
-          Confirm $8,790 transaction
+          Confirm $2,790 transaction
         </h1>
 
 <div className="
@@ -165,9 +165,9 @@ setConfirmed(true);
     text-white
     font-bold
   ">
-    $289
+    $201
   </span>
-  to complete the transaction.
+  to complete the transaction. 
 </p>
 
 <span className="
